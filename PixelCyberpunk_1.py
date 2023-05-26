@@ -15,16 +15,21 @@ pygame.display.set_caption('Shooter')
 clock = pygame.time.Clock()
 FPS = 60
 
+#game variables
+GRAVITY = 0.75
+
+
 # define player actions variables
 moving_left = False
 moving_right = False
 
 #define colours
 BG = (144, 201, 120)
-
+RED = (255, 0, 0)
 
 def draw_bg():
     screen.fill(BG)
+    pygame.draw.line(screen, RED, (0, 300), (SCREEN_WIDTH, 300))
 
 
 
@@ -32,36 +37,42 @@ def draw_bg():
 
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, char_type, pers_type, pose_type, x, y, scale, speed):
+    def __init__(self, char_type, pers_type, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
+        self.alive = True
         self.char_type = char_type
         self.pers_type = pers_type
-        self.pose_type = pose_type
+        # self.pose_type = pose_type
         self.speed = speed
         self.direction = 1
+        self.vel_y = 0
+        self.jump = False
+        self.in_air = True
         self.flip = False
         self.animation_list = []
         self.frame_index = 0
         self.action = 0
         self.update_time = pygame.time.get_ticks()
        
-        # count amount of images in folder
-        folder_path = f'media/{self.char_type}/{self.pers_type}/{self.pose_type}'
-        file_count = len(glob.glob(folder_path + '/*'))
+
         
-        temp_list = []
-        for i in range(4):
-            img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{self.pose_type}/{i}.png')
-            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-            temp_list.append(img)
-        self.animation_list.append(temp_list)
+        # load all images
+        animation_types = ['idle', 'walk', 'jump']
+        
+        for animation in animation_types:
+            # temp_list resets temporaty list of images
+            temp_list = []
             
-        temp_list = []
-        for i in range(6):
-            img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/walk/{i}.png')
-            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-            temp_list.append(img)
-        self.animation_list.append(temp_list)
+            # count amount of files (images) in folder - to use in for loop
+            folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
+            file_count = len(glob.glob(folder_path + '/*'))
+            print(f'{animation} : {file_count}')
+            for i in range(file_count):
+                img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
+    
         
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
@@ -82,6 +93,24 @@ class MainCharacter(pygame.sprite.Sprite):
             dx = self.speed
             self.flip = False
             self.direction = 1
+            
+        #jump
+        if self.jump == True and self.in_air == False:
+            self.vel_y = -20 # y coordinate starts at 0 at the top of the screen and increases as you go down
+            self.jump = False
+            self.in_air = True
+        
+        #gravity
+        self.vel_y += GRAVITY
+        if self.vel_y > 10:
+            self.vel_y
+        dy += self.vel_y
+        
+        #chceck collision with floor
+        if self.rect.bottom + dy > 300:
+            dy = 300 - self.rect.bottom
+            self.in_air = False
+        
 
         # update rectangle position
         self.rect.x += dx
@@ -99,6 +128,16 @@ class MainCharacter(pygame.sprite.Sprite):
         # index error fix
         if self.frame_index >= len(self.animation_list[self.action]):
             self.frame_index = 0
+            
+    
+    def update_action(self, new_action):
+        #if new_action is different from current one
+        if new_action != self.action:
+            self.action = new_action
+            #update animation
+            self.frame_index = 0
+            self.update_time = pygame.time.get_ticks()
+            
         
         
         
@@ -107,8 +146,8 @@ class MainCharacter(pygame.sprite.Sprite):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
-player = MainCharacter('enemy', 'officer', 'idle', 200, 200, 3, 5)
-# enemy = MainCharacter('enemy', 'officer', 'idle', 400, 200, 3, 5)
+player = MainCharacter('player', 'biker', 200, 200, 3, 5)
+# enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5)
 
 
 
@@ -123,9 +162,16 @@ while run:
     player.draw()
     # enemy.draw()
     
+    #update player actions
+    if player.alive:
+        if player.in_air:
+            player.update_action(2) # jump
+        elif moving_left or moving_right:
+            player.update_action(1) # run
+        else:
+            player.update_action(0) # idle
+    
     player.move(moving_left, moving_right)
-    
-    
     
     for event in pygame.event.get():
          #quit game
@@ -137,6 +183,8 @@ while run:
                 moving_left = True
             if event.key == pygame.K_d:
                 moving_right = True
+            if event.key == pygame.K_w and player.alive:
+                player.jump = True
             if event.key == pygame.K_ESCAPE:
                 run = False
 
