@@ -1,4 +1,5 @@
 import pygame
+import glob
 
 
 pygame.init()
@@ -31,13 +32,38 @@ def draw_bg():
 
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, speed):
+    def __init__(self, char_type, pers_type, pose_type, x, y, scale, speed):
         pygame.sprite.Sprite.__init__(self)
+        self.char_type = char_type
+        self.pers_type = pers_type
+        self.pose_type = pose_type
         self.speed = speed
         self.direction = 1
         self.flip = False
-        img = pygame.image.load('media/Biker_idle/biker_0.png')
-        self.image = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+        self.animation_list = []
+        self.frame_index = 0
+        self.action = 0
+        self.update_time = pygame.time.get_ticks()
+       
+        # count amount of images in folder
+        folder_path = f'media/{self.char_type}/{self.pers_type}/{self.pose_type}'
+        file_count = len(glob.glob(folder_path + '/*'))
+        
+        temp_list = []
+        for i in range(4):
+            img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{self.pose_type}/{i}.png')
+            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+            
+        temp_list = []
+        for i in range(6):
+            img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/walk/{i}.png')
+            img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+            temp_list.append(img)
+        self.animation_list.append(temp_list)
+        
+        self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)  
 
@@ -60,12 +86,29 @@ class MainCharacter(pygame.sprite.Sprite):
         # update rectangle position
         self.rect.x += dx
         self.rect.y += dy
+        
+        
+    def update_animation(self):
+        ANIMATION_COOLDOWN = 150
+        #update image depeding on current frame
+        self.image = self.animation_list[self.action][self.frame_index]
+        # check if enought time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+        # index error fix
+        if self.frame_index >= len(self.animation_list[self.action]):
+            self.frame_index = 0
+        
+        
+        
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
-player = MainCharacter(200, 200, 3, 5)
+player = MainCharacter('enemy', 'officer', 'idle', 200, 200, 3, 5)
+# enemy = MainCharacter('enemy', 'officer', 'idle', 400, 200, 3, 5)
 
 
 
@@ -76,8 +119,12 @@ while run:
     
     draw_bg()
     
+    player.update_animation()
     player.draw()
+    # enemy.draw()
+    
     player.move(moving_left, moving_right)
+    
     
     
     for event in pygame.event.get():
