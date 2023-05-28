@@ -24,6 +24,14 @@ GRAVITY = 0.75
 moving_left = False
 moving_right = False
 shoot = False
+grenade = False
+grenade_thrown = False
+
+#load images
+#bullet
+bullet_img = pygame.image.load('media/bullet/2.png')
+#grenade
+grenade_img = pygame.image.load('media/other/grenade/0.png')
 
 #define colours
 BG = (144, 201, 120)
@@ -39,7 +47,7 @@ def draw_bg():
 
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, char_type, pers_type, x, y, scale, speed, ammo):
+    def __init__(self, char_type, pers_type, x, y, scale, speed, ammo, grenades):
         pygame.sprite.Sprite.__init__(self)
         self.alive = True
         self.char_type = char_type
@@ -49,6 +57,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.ammo = ammo
         self.start_ammo = ammo
         self.shoot_cooldown = 0
+        self.grenades = grenades
         self.health = 100
         self.max_health = self.health
         self.direction = 1
@@ -178,9 +187,7 @@ class MainCharacter(pygame.sprite.Sprite):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
 
 
-#load images
-#bullet
-bullet_img = pygame.image.load('media/bullet/2.png')
+
 
 
 class Bullet(pygame.sprite.Sprite):
@@ -210,14 +217,61 @@ class Bullet(pygame.sprite.Sprite):
             if enemy.alive:
                 enemy.health -= 25
                 self.kill()
+                
+                
+                
+class Grenade(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
+        pygame.sprite.Sprite.__init__(self)
+        self.timer = 100
+        self.vel_y = -11
+        self.speed = 7
+        self.image = grenade_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+        self.bounce_count = 0
+        self.bounce_height = 10  # Wysokość pierwszego odbicia granatu
+        self.bounce_ratio = 0.5  # Współczynnik zmniejszania wysokości odbicia
+        
+    def update(self):
+        self.vel_y += GRAVITY
+        dx = self.direction * self.speed
+        dy = self.vel_y
+        
+        #chceck collision with floor
+        if self.rect.bottom + dy > 300:
+            dy = 300 - self.rect.bottom
+            #
+            # Odbicie granatu od podłoża
+            if self.bounce_count < 3:
+                self.vel_y = -self.bounce_height  # Zmień kierunek pigonowej prędkości granatu
+                self.bounce_height *= self.bounce_ratio  # Zmniejsz wysokość odbicia
+                self.bounce_count += 1  # Zwiększ licznik odbić
+            else:
+                self.speed = 0  # Jeżeli granat dotknął zmieni na stale, zatrzymuje sie
+                
+            
+        
+        #grenade out of screen
+        if self.rect.left + dx < 0 or self.rect.right + dx > SCREEN_WIDTH:
+            self.direction *= -1
+        
+        #update grenade position
+        self.rect.x += dx
+        self.rect.y += dy
+        
+
+
         
         
 #create sprite groups
 bullet_group = pygame.sprite.Group()
+grenade_group = pygame.sprite.Group()
 
 
-player = MainCharacter('player', 'biker', 200, 250, 3, 5, 20)
-enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10)
+player = MainCharacter('enemy', 'officer', 200, 250, 3, 5, 20, 5)
+enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
 
 
 
@@ -236,14 +290,24 @@ while run:
     
     #update and draw groups
     bullet_group.update()
+    grenade_group.update()
     bullet_group.draw(screen)
+    grenade_group.draw(screen)
     
     #update player actions
     if player.alive:
         #shoot
         if shoot:
             player.shoot()
-        if player.in_air:
+            player.update_action(4)
+        #grenades
+        elif grenade and grenade_thrown == False and player.grenades > 0:
+            grenade = Grenade(player.rect.centerx + int(0.55 * player.rect.size[0] * player.direction),\
+                            player.rect.centery - int(0.7 * player.rect.size[0]), player.direction)
+            grenade_group.add(grenade)
+            grenade_thrown = True
+            player.grenades -= 1
+        elif player.in_air:
             player.update_action(2) # jump
         elif moving_left or moving_right:
             player.update_action(1) # run
@@ -266,6 +330,9 @@ while run:
                 player.jump = True
             if event.key == pygame.K_SPACE:
                 shoot = True
+            if event.key == pygame.K_g:
+                grenade = True
+                grenade_thrown = False
             if event.key == pygame.K_ESCAPE:
                 run = False
 
@@ -278,6 +345,8 @@ while run:
                 moving_right = False
             if event.key == pygame.K_SPACE:
                 shoot = False
+            if event.key == pygame.K_g:
+                grenade = False   
             
 
 
