@@ -38,11 +38,26 @@ grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5
 money_img = pygame.image.load('media/other/money/0.png')
 grenade_box_img = pygame.image.load('media/other/grenade_box/0.png')
 ammo_box_img = pygame.image.load('media/other/ammo_box/0.png')
+item_boxes = {
+    'Money':money_img,
+    'Grenade':grenade_box_img,
+    'Ammo':ammo_box_img
+}
 
 
 #define colours
 BG = (144, 201, 120)
 RED = (255, 0, 0)
+WHITE = (255, 255, 255)
+
+
+#define font
+font = pygame.font.SysFont('Futura', 30)
+
+def draw_text(text, font, text_color, x, y):
+    img = font.render(text, True, text_color)
+    screen.blit(img, (x, y))
+
 
 def draw_bg():
     screen.fill(BG)
@@ -54,7 +69,7 @@ def draw_bg():
 
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, speed, ammo=0, grenades=0):
+    def __init__(self, x, y, scale, speed, ammo=0):
         pygame.sprite.Sprite.__init__(self)
         self.alive = True
         self.char_type = "player"
@@ -64,9 +79,11 @@ class MainCharacter(pygame.sprite.Sprite):
         self.ammo = ammo
         self.start_ammo = ammo
         self.shoot_cooldown = 0
-        self.grenades = grenades
+        self.grenades = 3
+        self.max_grenades = self.grenades
         self.health = 100
         self.max_health = self.health
+        self.money = 0
         self.direction = 1
         self.vel_y = 0
         self.jump = False
@@ -199,7 +216,7 @@ class Enemy(MainCharacter):
         super().__init__(x, y, scale, speed)
         self.char_type = char_type
         self.pers_type = pers_type
-        self.health = 150
+        self.health = 100
         self.ammo = 1000
         self.shoot_cooldown = 0
         self.animation_list = []
@@ -252,13 +269,34 @@ class Enemy(MainCharacter):
     
     
 
-# class ItemBox(pygame.sprite.Sprite):
-#     def __init__(self, item_type, x, y):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.item_type = item_type
-#         self.image = item_boxes[self.item_type] #choosing item from available items
-#         self.rect = self.image.get_rect()
-#         self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+class ItemBox(pygame.sprite.Sprite):
+    def __init__(self, item_type, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.item_type = item_type
+        self.image = item_boxes[self.item_type] #choosing item from dict available items
+        self.rect = self.image.get_rect()
+        self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+        
+    def update(self):
+        # collision with MainCharacter
+        if pygame.sprite.collide_rect(self, player):
+            #box type
+            if self.item_type == 'Money':
+                player.money += 10
+                self.kill()
+            elif self.item_type == "Grenade":
+                if player.grenades + 2 <= player.max_grenades + 1:
+                    player.grenades += 2
+                    self.kill()
+                    if player.grenades > 3:
+                        player.grenades = player.max_grenades      
+            elif self.item_type == "Ammo":
+                player.ammo += 20
+                self.kill()
+            # print(f"Money: {player.money}")
+            # print(f"Grenade: {player.grenades}")
+            # print(f"Ammo: {player.ammo}")
+
 
 
 
@@ -399,14 +437,25 @@ enemy_group = pygame.sprite.Group()
 bullet_group = pygame.sprite.Group()
 grenade_group = pygame.sprite.Group()
 explosion_group = pygame.sprite.Group()
+item_box_group = pygame.sprite.Group()
 
+
+# creating item boxes
+item_box = ItemBox("Money", 100, 260)
+item_box_group.add(item_box)
+item_box = ItemBox("Ammo", 400, 260)
+item_box_group.add(item_box)
+item_box = ItemBox("Grenade", 500, 260)
+item_box_group.add(item_box)
 
 # enemy2 = MainCharacter('player', 'biker', 200, 250, 3, 5, 20, 5)
 # enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
 # player = EnemyOfficer('enemy', 'officer', 500, 300, 3, 5) #(char_type, pers_type, x, y, scale, speed):
+
+player = MainCharacter(200, 250, 3, 5, 20) #(char_type, pers_type, x, y, scale, speed):
 enemy2 = Enemy(500, 300, 3, 5)
 enemy = Enemy(400, 200, 3, 5)
-player = MainCharacter(200, 250, 3, 5, 20, 5) #(char_type, pers_type, x, y, scale, speed):
+
 
 enemy_group.add(enemy)
 enemy_group.add(enemy2)
@@ -419,6 +468,16 @@ while run:
     
     draw_bg()
     
+    #show ammo
+    draw_text(f'AMMO: {player.ammo}', font, WHITE, 10, 35)
+    #show grenades
+    draw_text(f'GRENADE: {player.grenades}', font, WHITE, 10, 60)
+    #show money
+    draw_text(f'MONEY: {player.money}', font, WHITE, 10, 85)
+    
+    
+    
+    
     player.update()
     player.draw()
     
@@ -429,10 +488,12 @@ while run:
     #update and draw groups
     bullet_group.update()
     grenade_group.update()
+    item_box_group.update()
     explosion_group.update()
     
     bullet_group.draw(screen)
     grenade_group.draw(screen)
+    item_box_group.draw(screen)
     explosion_group.draw(screen)
     
     
