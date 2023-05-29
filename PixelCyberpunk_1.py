@@ -34,6 +34,11 @@ bullet_img = pygame.image.load('media/bullet/2.png')
 #grenade
 grenade_img = pygame.image.load('media/other/grenade/idle/0.png')
 grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5, grenade_img.get_height() * 1.5))
+#pick up boxes items
+money_img = pygame.image.load('media/other/money/0.png')
+grenade_box_img = pygame.image.load('media/other/grenade_box/0.png')
+ammo_box_img = pygame.image.load('media/other/ammo_box/0.png')
+
 
 #define colours
 BG = (144, 201, 120)
@@ -49,11 +54,11 @@ def draw_bg():
 
 
 class MainCharacter(pygame.sprite.Sprite):
-    def __init__(self, char_type, pers_type, x, y, scale, speed, ammo, grenades):
+    def __init__(self, x, y, scale, speed, ammo=0, grenades=0):
         pygame.sprite.Sprite.__init__(self)
         self.alive = True
-        self.char_type = char_type
-        self.pers_type = pers_type
+        self.char_type = "player"
+        self.pers_type = "biker"
         # self.pose_type = pose_type
         self.speed = speed
         self.ammo = ammo
@@ -166,7 +171,7 @@ class MainCharacter(pygame.sprite.Sprite):
                 self.frame_index = len(self.animation_list[self.action]) - 1
             else:
                 self.frame_index = 0
-            
+             
     
     def update_action(self, new_action):
         #if new_action is different from current one
@@ -187,6 +192,75 @@ class MainCharacter(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), self.rect)
+
+
+class Enemy(MainCharacter):
+    def __init__(self, x, y, scale, speed, char_type="enemy", pers_type="officer"):
+        super().__init__(x, y, scale, speed)
+        self.char_type = char_type
+        self.pers_type = pers_type
+        self.health = 150
+        self.ammo = 1000
+        self.shoot_cooldown = 0
+        self.animation_list = []
+
+        
+        animation_types = ['idle', 'walk', 'death', 'shoot']
+        
+        for animation in animation_types:
+            # temp_list resets temporaty list of images
+            temp_list = []
+            
+            # count amount of files (images) in folder - to use in for loop
+            folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
+            file_count = len(glob.glob(folder_path + '/*'))
+            print(f'{animation} : {file_count}')
+            for i in range(file_count):
+                img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
+    
+        
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        
+        
+    def update_animation(self):
+        ANIMATION_COOLDOWN = 100
+        #update image depeding on current frame
+        self.image = self.animation_list[self.action][self.frame_index]
+        # check if enought time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+        # index error fix
+        if self.frame_index >= len(self.animation_list[self.action]):
+            if self.action == 2:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+            else:
+                self.frame_index = 0
+        
+        
+    def check_alive(self):
+        if self.health <= 0:
+            self.health = 0
+            self.speed = 0
+            self.alive = False
+            self.update_action(2)
+    
+    
+
+# class ItemBox(pygame.sprite.Sprite):
+#     def __init__(self, item_type, x, y):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.item_type = item_type
+#         self.image = item_boxes[self.item_type] #choosing item from available items
+#         self.rect = self.image.get_rect()
+#         self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+
+
 
 
 
@@ -327,9 +401,12 @@ grenade_group = pygame.sprite.Group()
 explosion_group = pygame.sprite.Group()
 
 
-player = MainCharacter('enemy', 'officer', 200, 250, 3, 5, 20, 5)
-enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
-enemy2 = MainCharacter('enemy', 'officer', 500, 300, 3, 5, 10, 0)
+# enemy2 = MainCharacter('player', 'biker', 200, 250, 3, 5, 20, 5)
+# enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
+# player = EnemyOfficer('enemy', 'officer', 500, 300, 3, 5) #(char_type, pers_type, x, y, scale, speed):
+enemy2 = Enemy(500, 300, 3, 5)
+enemy = Enemy(400, 200, 3, 5)
+player = MainCharacter(200, 250, 3, 5, 20, 5) #(char_type, pers_type, x, y, scale, speed):
 
 enemy_group.add(enemy)
 enemy_group.add(enemy2)
