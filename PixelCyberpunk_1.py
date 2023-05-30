@@ -35,14 +35,35 @@ bullet_img = pygame.image.load('media/bullet/2.png')
 grenade_img = pygame.image.load('media/other/grenade/idle/0.png')
 grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5, grenade_img.get_height() * 1.5))
 #pick up boxes items
-money_img = pygame.image.load('media/other/money/0.png')
-grenade_box_img = pygame.image.load('media/other/grenade_box/0.png')
-ammo_box_img = pygame.image.load('media/other/ammo_box/0.png')
-item_boxes = {
-    'Money':money_img,
-    'Grenade':grenade_box_img,
-    'Ammo':ammo_box_img
-}
+# animation_list_boxes_items = []
+# animation_types_boxes_items = ['money', 'grenade_box', 'ammo_box']
+
+# for animation in animation_types_boxes_items:
+#     # temp_list resets temporaty list of images
+#     temp_list = []
+    
+#     folder_path = f'media/other/{animation}'
+#     file_count = len(glob.glob(folder_path + '/*'))
+    
+#     for i in range(file_count):
+#         img = pygame.image.load(f'media/other/{animation}/{i}.png')
+#         img = pygame.transform.scale(img, (int(img.get_width() * 1), int(img.get_height() * 1)))
+#         temp_list.append(img)
+#     animation_list_boxes_items.append(temp_list)
+    
+#     #animation_list_boxes_items[0] - money
+#     #animation_list_boxes_items[1] - grenade_box
+#     #animation_list_boxes_items[2] - ammo_box
+
+
+# money_img = pygame.image.load('media/other/money/0.png')
+# grenade_box_img = pygame.image.load('media/other/grenade_box/0.png')
+# ammo_box_img = pygame.image.load('media/other/ammo_box/0.png')
+# item_boxes = {
+#     'Money':money_img,
+#     'Grenade':grenade_box_img,
+#     'Ammo':ammo_box_img
+# }
 
 
 #define colours
@@ -106,7 +127,7 @@ class MainCharacter(pygame.sprite.Sprite):
             # count amount of files (images) in folder - to use in for loop
             folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
             file_count = len(glob.glob(folder_path + '/*'))
-            print(f'{animation} : {file_count}')
+            # print(f'{animation} : {file_count}')
             for i in range(file_count):
                 img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
@@ -231,7 +252,7 @@ class Enemy(MainCharacter):
             # count amount of files (images) in folder - to use in for loop
             folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
             file_count = len(glob.glob(folder_path + '/*'))
-            print(f'{animation} : {file_count}')
+            # print(f'{animation} : {file_count}')
             for i in range(file_count):
                 img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
                 img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
@@ -272,30 +293,62 @@ class Enemy(MainCharacter):
 class ItemBox(pygame.sprite.Sprite):
     def __init__(self, item_type, x, y):
         pygame.sprite.Sprite.__init__(self)
+        self.item_taken = False
+        self.images = []
         self.item_type = item_type
-        self.image = item_boxes[self.item_type] #choosing item from dict available items
+        # self.image = item_boxes[self.item_type] #choosing item from dict available items
+        # self.rect = self.image.get_rect()
+        # self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+        for i in range(0, 5):
+            img = pygame.image.load(f'media/other/{self.item_type}/{i}.png')
+            img = pygame.transform.scale(img, (int(img.get_width() * 1), int(img.get_height() * 1)))
+            self.images.append(img)
+
+        self.frame_index = 0
+        self.image = self.images[self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.midtop = (x + TILE_SIZE // 2, y + (TILE_SIZE - self.image.get_height()))
+        self.counter = 0
         
     def update(self):
-        # collision with MainCharacter
+        OPEN_BOX_SPEED = 5
+        #update animation
+        self.counter += 1
         if pygame.sprite.collide_rect(self, player):
-            #box type
-            if self.item_type == 'Money':
-                player.money += 10
-                self.kill()
-            elif self.item_type == "Grenade":
-                if player.grenades + 2 <= player.max_grenades + 1:
-                    player.grenades += 2
-                    self.kill()
-                    if player.grenades > 3:
-                        player.grenades = player.max_grenades      
-            elif self.item_type == "Ammo":
-                player.ammo += 20
-                self.kill()
-            # print(f"Money: {player.money}")
-            # print(f"Grenade: {player.grenades}")
-            # print(f"Ammo: {player.ammo}")
+            if self.counter >= OPEN_BOX_SPEED:
+                self.counter = 0
+                # collision with MainCharacter
+                if self.item_type == 'money':
+                    self.frame_index += 1 
+                    player.money += 3
+                    if self.frame_index >= len(self.images):
+                        self.kill()
+                    else:
+                        self.image = self.images[self.frame_index]
+                elif self.item_type == "grenade_box":
+                    if not self.item_taken:
+                        self.frame_index += 1    
+                        player.grenades += 2
+                        if self.frame_index >= len(self.images):
+                            pass
+                        else:
+                            self.image = self.images[self.frame_index]
+                        if player.grenades > 3:
+                            player.grenades = player.max_grenades
+                    if self.frame_index == 5:
+                        self.item_taken = True
+                elif self.item_type == "ammo_box":
+                    if not self.item_taken:
+                        self.frame_index += 1 
+                        player.ammo += 20
+                        if self.frame_index >= len(self.images):
+                            pass
+                        else:
+                            self.image = self.images[self.frame_index]
+                        if player.ammo > 40:
+                            player.ammo = 40
+                    if self.frame_index == 5:
+                        self.item_taken = True
 
 
 
@@ -397,18 +450,12 @@ class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, scale):
         pygame.sprite.Sprite.__init__(self)
         self.images = []
-        # for i in range(0, 4):
-        #     img = pygame.image.load(f'media/other/grenade/pre_explosion/{i}.png')
-        #     img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
-        #     self.images.append(img)
-        # img_rect = self.images[3].get_rect()
-        # center_x = img_rect.centerx
-        # center_y = img_rect.centery
+        #loading photos to create animation
         for i in range(0, 12):
             img = pygame.image.load(f'media/other/grenade/explosion/{i}.png')
             img = pygame.transform.scale(img, (int(img.get_width() * 2.5), int(img.get_height() * 2.5)))
             self.images.append(img)
-        print(len(self.images))
+        # print(len(self.images))
         self.frame_index = 0
         self.image = self.images[self.frame_index]
         self.rect = self.image.get_rect()
@@ -441,11 +488,11 @@ item_box_group = pygame.sprite.Group()
 
 
 # creating item boxes
-item_box = ItemBox("Money", 100, 260)
+item_box = ItemBox("money", 100, 260)
 item_box_group.add(item_box)
-item_box = ItemBox("Ammo", 400, 260)
+item_box = ItemBox("ammo_box", 400, 260)
 item_box_group.add(item_box)
-item_box = ItemBox("Grenade", 500, 260)
+item_box = ItemBox("grenade_box", 500, 260)
 item_box_group.add(item_box)
 
 # enemy2 = MainCharacter('player', 'biker', 200, 250, 3, 5, 20, 5)
@@ -469,9 +516,21 @@ while run:
     draw_bg()
     
     #show ammo
-    draw_text(f'AMMO: {player.ammo}', font, WHITE, 10, 35)
+    draw_text('AMMO: ', font, WHITE, 10, 35)
+    if player.ammo <= 20:      
+        for x in range(player.ammo):
+            screen.blit(bullet_img, (90 + (x * 10), 40))
+    else:
+        rest_ammo = player.ammo - 20
+        for x in range(20):
+            screen.blit(bullet_img, (90 + (x * 10), 40))
+        for y in range(rest_ammo):
+            screen.blit(bullet_img, (90 + (y * 10), 30))
+                
     #show grenades
     draw_text(f'GRENADE: {player.grenades}', font, WHITE, 10, 60)
+    for x in range(player.grenades):
+        screen.blit(grenade_img, (135 + (x * 15), 60))
     #show money
     draw_text(f'MONEY: {player.money}', font, WHITE, 10, 85)
     
