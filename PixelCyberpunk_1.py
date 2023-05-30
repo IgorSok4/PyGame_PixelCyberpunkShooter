@@ -70,6 +70,8 @@ grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5
 BG = (144, 201, 120)
 RED = (255, 0, 0)
 WHITE = (255, 255, 255)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
 
 
 #define font
@@ -352,7 +354,21 @@ class ItemBox(pygame.sprite.Sprite):
 
 
 
-
+class HealthBar():
+    def __init__(self, x, y, health, max_health):
+        self.x = x
+        self.y = y
+        self.health = health
+        self.max_health = max_health
+        
+    def draw(self, health):
+        #update with new health
+        self.health = health
+        #health ratio - diference between full health and actual health
+        ratio = self.health / self.max_health
+        pygame.draw.rect(screen, BLACK, (self.x - 2, self.y - 2, 154, 24))
+        pygame.draw.rect(screen, RED, (self.x, self.y, 150, 20))
+        pygame.draw.rect(screen, GREEN, (self.x, self.y, 150 * ratio, 20))
 
 
 
@@ -499,7 +515,8 @@ item_box_group.add(item_box)
 # enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
 # player = EnemyOfficer('enemy', 'officer', 500, 300, 3, 5) #(char_type, pers_type, x, y, scale, speed):
 
-player = MainCharacter(200, 250, 3, 5, 20) #(char_type, pers_type, x, y, scale, speed):
+player = MainCharacter(200, 250, 3, 5, 20) #(x, y, scale, speed)
+healthbar = HealthBar(10, 10, player.health, player.max_health)
 enemy2 = Enemy(500, 300, 3, 5)
 enemy = Enemy(400, 200, 3, 5)
 
@@ -514,6 +531,8 @@ while run:
     clock.tick(FPS)
     
     draw_bg()
+    #player health
+    healthbar.draw(player.health)
     
     #show ammo
     draw_text('AMMO: ', font, WHITE, 10, 35)
@@ -539,6 +558,7 @@ while run:
     
     player.update()
     player.draw()
+    
     
     for enemy in enemy_group:
         enemy.update()
