@@ -1,6 +1,7 @@
 import pygame
 import glob
 from bullet import *
+import random
 
 
 pygame.init()
@@ -243,6 +244,12 @@ class Enemy(MainCharacter):
         self.ammo = 1000
         self.shoot_cooldown = 0
         self.animation_list = []
+        #ai
+        self.move_counter = 0
+        self.idling = False
+        self.idling_counter = 0
+        self.vision = pygame.Rect(0, 0, 150, 20) #150 - how far enemies can look
+        
 
         
         animation_types = ['idle', 'walk', 'death', 'shoot']
@@ -267,6 +274,40 @@ class Enemy(MainCharacter):
         self.rect.center = (x, y)
         
         
+    def ai(self):
+        if self.alive and player.alive:
+            if self.idling == False and random.randint(1, 100) == 10:
+                self.update_action(0) #idling
+                self.idling = True
+                self.idling_counter = random.randint(20, 50)
+            #if ai in near the player
+            if self.vision.colliderect(player.rect):
+                #shoot player and stop
+                self.update_action(3) #idling
+                self.shoot()
+            else:
+                if self.idling == False:
+                    if self.direction == 1:
+                        ai_move_right = True
+                    else:
+                        ai_move_right = False
+                    ai_move_left = not ai_move_right
+                    self.move(ai_move_left, ai_move_right)
+                    self.update_action(1) #run
+                    self.move_counter += 1
+                    #update vision with move
+                    self.vision.center = (self.rect.centerx + 75 * self.direction,\
+                                        self.rect.centery)
+                    # pygame.draw.rect(screen, RED, self.vision)
+                    if self.move_counter > TILE_SIZE:
+                        self.direction *= -1
+                        self.move_counter *= -1
+                else:
+                    self.idling_counter -= 1
+                    if self.idling_counter <= 0:
+                        self.idling = False
+        
+        
     def update_animation(self):
         ANIMATION_COOLDOWN = 100
         #update image depeding on current frame
@@ -289,6 +330,9 @@ class Enemy(MainCharacter):
             self.speed = 0
             self.alive = False
             self.update_action(2)
+            
+    
+    
     
     
 
@@ -360,7 +404,7 @@ class HealthBar():
         self.y = y
         self.health = health
         self.max_health = max_health
-        
+         
     def draw(self, health):
         #update with new health
         self.health = health
@@ -430,7 +474,7 @@ class Grenade(pygame.sprite.Sprite):
             if self.bounce_count < 3:
                 self.vel_y = -self.bounce_height  # Zmień kierunek pigonowej prędkości granatu
                 self.bounce_height *= self.bounce_ratio  # Zmniejsz wysokość odbicia
-                self.bounce_count += 1  # Zwiększ licznik odbić
+                self.bounce_count += 2  # Zwiększ licznik odbić
             else:
                 self.speed = 0  # Jeżeli granat dotknął zmieni na stale, zatrzymuje sie
                 
@@ -515,10 +559,10 @@ item_box_group.add(item_box)
 # enemy = MainCharacter('enemy', 'officer', 400, 200, 3, 5, 10, 0)
 # player = EnemyOfficer('enemy', 'officer', 500, 300, 3, 5) #(char_type, pers_type, x, y, scale, speed):
 
-player = MainCharacter(200, 250, 3, 5, 20) #(x, y, scale, speed)
+player = MainCharacter(200, 250, 2, 5, 20) #(x, y, scale, speed)
 healthbar = HealthBar(10, 10, player.health, player.max_health)
-enemy2 = Enemy(500, 300, 3, 5)
-enemy = Enemy(400, 200, 3, 5)
+enemy2 = Enemy(500, 300, 2, 3)
+enemy = Enemy(400, 200, 2, 3)
 
 
 enemy_group.add(enemy)
@@ -555,12 +599,12 @@ while run:
     
     
     
-    
     player.update()
     player.draw()
     
     
     for enemy in enemy_group:
+        enemy.ai()
         enemy.update()
         enemy.draw()
     
@@ -584,7 +628,7 @@ while run:
             player.update_action(4)
         #grenades
         elif grenade and grenade_thrown == False and player.grenades > 0:
-            grenade = Grenade(player.rect.centerx + int(0.55 * player.rect.size[0] * player.direction),\
+            grenade = Grenade(player.rect.centerx + int(0.95 * player.rect.size[0] * player.direction),\
                             player.rect.centery - int(0.7 * player.rect.size[0]), player.direction)
             grenade_group.add(grenade)
             grenade_thrown = True
