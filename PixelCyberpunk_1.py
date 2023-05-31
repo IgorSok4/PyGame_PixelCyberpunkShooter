@@ -121,7 +121,7 @@ class MainCharacter(pygame.sprite.Sprite):
 
         
         # load all images
-        animation_types = ['idle', 'walk', 'jump', 'death', 'shoot']
+        animation_types = ['idle2', 'walk2', 'jump', 'death', 'shoot2', 'hit']
         
         for animation in animation_types:
             # temp_list resets temporaty list of images
@@ -199,7 +199,7 @@ class MainCharacter(pygame.sprite.Sprite):
         
         
     def update_animation(self):
-        ANIMATION_COOLDOWN = 100
+        ANIMATION_COOLDOWN = 50
         #update image depeding on current frame
         self.image = self.animation_list[self.action][self.frame_index]
         # check if enought time has passed since the last update
@@ -252,7 +252,7 @@ class Enemy(MainCharacter):
         
 
         
-        animation_types = ['idle', 'walk', 'death', 'shoot']
+        animation_types = ['idle', 'walk', 'death', 'shoot', 'hit']
         
         for animation in animation_types:
             # temp_list resets temporaty list of images
@@ -437,11 +437,16 @@ class Bullet(pygame.sprite.Sprite):
         
         if pygame.sprite.spritecollide(player, bullet_group, False):
             if player.alive:
+                print("Player dostal")
+                player.update_action(5)
                 player.health -= 5
                 self.kill()
         for enemy in enemy_group:        
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
-                if enemy.alive:
+                if isinstance(self, Enemy):
+                    print("bot nie dostal, a mogl dostac")
+                    pass
+                elif enemy.alive:
                     enemy.health -= 25
                     self.kill()
                 
