@@ -1,38 +1,55 @@
 import pygame
 
-# #load images
-# #bullet
-# bullet_img = pygame.image.load('media/bullet/2.png')
+from settings import *
+from groups import *
 
 
-# class Bullet(pygame.sprite.Sprite):
-#     def __init__(self, x, y, direction, screen_width, player):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.speed = 23
-#         self.image = bullet_img
-#         self.rect = self.image.get_rect()
-#         self.rect.center = (x, y)
-#         self.direction = direction
-#         self.screen_width = screen_width
-#         self.player = player
+#load images
+bullet_img = pygame.image.load('media/bullet/ak.png')
+
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction, shooter):
+        pygame.sprite.Sprite.__init__(self)
+        self.speed = 23
+        self.image = bullet_img
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        self.direction = direction
+        self.shooter = shooter
         
-#     def update(self):
-#         #move bullet
-#         self.rect.x += (self.direction * self.speed)
-#         #bullet out of screen
-#         if self.rect.right < 0 or self.rect.left > self.screen_width:
-#             self.kill
+        
+    def update(self):
+        from static_objects import world, player
+        #move bullet
+        self.rect.x += (self.direction * self.speed) + screen_scroll
+        #bullet out of screen
+        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
+            self.kill()
+
+
+        #collision with map
+        for tile in world.obstacle_list:
+            if tile[1].colliderect(self.rect):
+                self.kill()
+        
             
-#         # check collision with characters
+        # check collision with characters
         
-#         if pygame.sprite.spritecollide(self.player, bullet_group, False):
-#             if self.player.alive:
-#                 self.kill
-                
-#         if pygame.sprite.spritecollide(self.player, bullet_group, False):
-#             if self.player.alive:
-#                 self.kill
-        
-        
-# #create sprite groups
-# bullet_group = pygame.sprite.Group()
+        if pygame.sprite.spritecollide(player, bullet_group, False):
+            if player.alive:
+                print("Player dostal")
+                player.update_action(5)
+                player.health -= 5
+                self.kill()
+        for enemy in enemy_group:        
+            if pygame.sprite.spritecollide(enemy, bullet_group, False):
+                # if isinstance(self.shooter, Enemy):
+                #     print("bot nie dostal, a mogl dostac")
+                #     pass
+                # elif enemy.alive:
+                #     enemy.health -= 50
+                #     self.kill()
+                if enemy.alive:
+                    enemy.health -= 50
+                    self.kill()
+                    
