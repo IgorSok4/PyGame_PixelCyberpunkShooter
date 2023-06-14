@@ -3,6 +3,7 @@ import pygame
 from explosions import Explosion
 from static_objects import *
 from groups import *
+from globals import g
 
 
 #load images
@@ -55,7 +56,7 @@ class Grenade(pygame.sprite.Sprite):
             self.direction *= -1
         
         #update grenade position
-        self.rect.x += dx + screen_scroll
+        self.rect.x += dx + g.screen_scroll
         self.rect.y += dy
 
         #countdown times

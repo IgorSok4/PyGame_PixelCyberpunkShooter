@@ -45,17 +45,16 @@ def main():
         #player health
         healthbar.draw(player.health)
         
-        # # show ammo
-        # draw_text('AMMO: ', font, WHITE, 10, 35)
-        # if player.ammo <= 20:      
-        #     for x in range(player.ammo):
-        #         screen.blit(bullet_img, (90 + (x * 10), 40))
-        # else:
-        #     rest_ammo = player.ammo - 20
-        #     for x in range(20):
-        #         screen.blit(bullet_img, (90 + (x * 10), 40))
-        #     for y in range(rest_ammo):
-        #         screen.blit(bullet_img, (90 + (y * 10), 30))
+        # show ammo
+        if player.ammo <= 20:      
+            for x in range(player.ammo):
+                screen.blit(bullet_img_rotated, (10 + (x * 5), 70))
+        else:
+            rest_ammo = player.ammo - 20
+            for x in range(20):
+                screen.blit(bullet_img_rotated, (10 + (x * 5), 70))
+            for y in range(rest_ammo):
+                screen.blit(bullet_img_rotated, (10 + (y * 5), 80))
                     
         #show grenades
         for x in range(player.grenades):
@@ -80,16 +79,12 @@ def main():
         grenade_group.update()
         item_box_group.update()
         explosion_group.update()
-        # decoration_group.update()
-        # exit_group.update()
         
         bullet_group.draw(screen)
         grenade_group.draw(screen)
         item_box_group.draw(screen)
         explosion_group.draw(screen)
-        # decoration_group.draw(screen)
-        # exit_group.draw(screen)
-        global screen_scroll
+        
         #update player actions
         if player.alive:
             #shoot

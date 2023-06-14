@@ -3,6 +3,7 @@ import pygame
 from settings import *
 from groups import *
 from static_objects import player
+from globals import g
 
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, grenade_rect):
@@ -23,7 +24,7 @@ class Explosion(pygame.sprite.Sprite):
         
         
     def update(self):
-        self.rect.x += screen_scroll
+        self.rect.x += g.screen_scroll
         EXPLOSION_SPEED = 7  #speed of an animation
         #update animation
         self.counter += 1

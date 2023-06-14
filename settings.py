@@ -21,6 +21,7 @@ screen_scroll = 0
 
     
 bullet_img = pygame.image.load('media/bullet/ak.png')
+bullet_img_rotated = pygame.transform.rotate(bullet_img, -90)
 grenade_img = pygame.image.load('media/other/grenade/idle/0.png')
 grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5, grenade_img.get_height() * 1.5))
 money_img = pygame.image.load('media/other/money/0.png')
