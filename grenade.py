@@ -3,7 +3,7 @@ import pygame
 from explosions import Explosion
 from static_objects import *
 from groups import *
-from globals import g
+# from globals import g
 
 
 #load images

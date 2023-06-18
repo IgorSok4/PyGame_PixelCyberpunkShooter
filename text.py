@@ -11,7 +11,7 @@ class Text:
 
     def draw(self, screen):
         font = pygame.font.SysFont(self.font_type, self.font_size)
-        text = str(self.player.money)
+        text = str(self.player)
         image = font.render(text, True, self.text_colour)
         rect = image.get_rect()
         rect.center = self.px, self.py

@@ -2,7 +2,7 @@ import pygame
 
 from settings import *
 from groups import *
-from static_objects import player
+from static_objects import *
 from globals import g
 
 class Explosion(pygame.sprite.Sprite):

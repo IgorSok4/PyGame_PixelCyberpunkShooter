@@ -14,7 +14,7 @@ ROWS = 21
 COLS = 96
 TILE_SIZE = 32
 TILE_TYPES = 42
-level = 1
+# level = 1
 screen_scroll = 0
 
 
@@ -38,6 +38,10 @@ menu_background_4 =  pygame.image.load('media/map/menu/background/background_4.p
 # menu buttons
 menu_button_start = pygame.image.load('media/map/menu/buttons/button_start.png')
 menu_button_quit = pygame.image.load('media/map/menu/buttons/button_quit.png')
+menu_button_level_1 = pygame.image.load('media/map/menu/buttons/button_level_1.png')
+menu_button_level_2 = pygame.image.load('media/map/menu/buttons/button_level_2.png')
+menu_button_level_3 = pygame.image.load('media/map/menu/buttons/button_level_3.png')
+menu_button_return = pygame.image.load('media/map/menu/buttons/button_return.png')
 
 #level buttons
 retry_button = pygame.image.load('media/map/level_buttons/retry.png')

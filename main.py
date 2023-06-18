@@ -56,10 +56,15 @@ def main():
     grenade_thrown = False
     bg_scroll = 0
     start_game = False
+    menu_state = "main"
 
     #buttons
-    start_button = Button(100, 100, menu_button_start)
-    quit_button = Button(100, 200, menu_button_quit)
+    start_button = Button(100, 100, menu_button_start, 2)
+    quit_button = Button(100, 200, menu_button_quit, 2)
+    level_1_button = Button(100, 100, menu_button_level_1, 2)
+    level_2_button = Button(100, 200, menu_button_level_2, 2)
+    level_3_button = Button(100, 300, menu_button_level_3, 2)
+    return_button = Button(10, 10, menu_button_return, 1)
     level_retry_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, retry_button, 3)
     text_points = Text(player, BLACK, 60, 118, font_size=24)
 
@@ -69,15 +74,39 @@ def main():
         clock.tick(FPS)
         
         if start_game == False:
-            g.bg_scroll_menu += 2
-            draw_menu_bg(g.bg_scroll_menu)
-            start_button.draw(screen)
-            quit_button.draw(screen)
-            for event in pygame.event.get():
-                if start_button.is_clicked(event):
-                    start_game = True
-                if quit_button.is_clicked(event):
-                    run = False
+            if menu_state == 'main':
+                g.bg_scroll_menu += 2
+                draw_menu_bg(g.bg_scroll_menu)
+                start_button.draw(screen)
+                quit_button.draw(screen)
+                for event in pygame.event.get():
+                    if start_button.is_clicked(event):
+                        # start_game = True
+                        menu_state = 'level'
+                    if quit_button.is_clicked(event):
+                        run = False
+            if menu_state == 'level':
+                g.bg_scroll_menu += 2
+                draw_menu_bg(g.bg_scroll_menu)
+                return_button.draw(screen)
+                level_1_button.draw(screen)
+                level_2_button.draw(screen)
+                level_3_button.draw(screen)
+                for event in pygame.event.get():
+                    if return_button.is_clicked(event):
+                        menu_state = 'main'
+                    if level_1_button.is_clicked(event):
+                        g.level = 1
+                        reset_level()
+                        start_game = True
+                    if level_2_button.is_clicked(event):
+                        g.level = 2
+                        reset_level()
+                        start_game = True
+                    if level_3_button.is_clicked(event):
+                        g.level = 3
+                        reset_level()
+                        start_game = True
         else:
         
         
@@ -190,11 +219,8 @@ def main():
             if level_retry_button.is_clicked(event):
                 g.screen_scroll = 0
                 bg_scroll = 0
-                print("CLICKED")
                 start_game = False
                 reset_level()
-                # world_data = reset_level()
-                # player, healthbar = world.process_tiles(world_data)
                 
 
                 

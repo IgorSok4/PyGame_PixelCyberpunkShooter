@@ -267,8 +267,10 @@ class Enemy(MainCharacter):
                     self.update_action(1) #run
                     self.move_counter += 1
                     #update vision with move
-                    self.vision.center = (self.rect.centerx + 75 * self.direction,\
-                                        self.rect.centery)
+                    if self.direction == 1:  # If the enemy is looking right
+                            self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 400, 10)
+                    else:  # If the enemy is looking left
+                        self.vision = pygame.Rect(self.rect.centerx - 400, self.rect.centery, 400, 10)
                     # pygame.draw.rect(screen, RED, self.vision)
                     if self.move_counter > TILE_SIZE:
                         self.direction *= -1
