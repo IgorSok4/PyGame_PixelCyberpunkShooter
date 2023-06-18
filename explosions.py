@@ -24,6 +24,7 @@ class Explosion(pygame.sprite.Sprite):
         
         
     def update(self):
+        from static_objects import player, world
         self.rect.x += g.screen_scroll
         EXPLOSION_SPEED = 7  #speed of an animation
         #update animation
@@ -38,7 +39,7 @@ class Explosion(pygame.sprite.Sprite):
             else:
                 self.image = self.images[self.frame_index]
         
-        if self.frame_index == 6:  # on frame 2 of explosion, grenade deals another damage to the enemies/player
+        if self.frame_index == 6:  # on frame 6 of explosion, grenade deals another damage to the enemies/player
             distance_to_player = max(abs(self.grenade_rect.centerx - player.rect.centerx),
                                      abs(self.grenade_rect.centery - player.rect.centery))
             if distance_to_player < TILE_SIZE * 4:

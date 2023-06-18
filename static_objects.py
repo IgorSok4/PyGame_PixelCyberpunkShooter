@@ -13,5 +13,6 @@ def reset_static_objects():
     world.reset_tiles()
     world_data = world.load_map(f'level{g.level}_przeszkody.csv')
     player, healthbar = world.process_tiles(world_data)
+    # print(f'id(player) static_objects: {id(player)}')
     
     return world, player, healthbar

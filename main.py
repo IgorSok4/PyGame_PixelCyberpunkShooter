@@ -38,7 +38,7 @@ def reset_level():
     item_box_group.empty()
     
     # new_world = world.load_map('level3_przeszkody.csv')
-    
+    # print(f'id(player) reset_level: {id(player)}')
     world, player, healthbar = reset_static_objects()
 
 
@@ -72,7 +72,7 @@ def main():
     while run:
         
         clock.tick(FPS)
-        
+        # print(f'id(player: {id(player)}')
         if start_game == False:
             if menu_state == 'main':
                 g.bg_scroll_menu += 2
