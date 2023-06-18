@@ -3,7 +3,7 @@ import random
 import csv
 
 from characters import MainCharacter, Enemy
-from settings import TILE_TYPES, screen_scroll, screen
+from settings import TILE_TYPES, screen
 from groups import *
 from healthbar import HealthBar
 from itemboxes import *
@@ -81,3 +81,8 @@ class World:
         for tile in self.obstacle_list:
             tile[1][0] += g.screen_scroll
             screen.blit(tile[0], tile[1])
+            
+    
+    def reset_tiles(self):
+        self.obstacle_list = []
+        self.decoration_list = []

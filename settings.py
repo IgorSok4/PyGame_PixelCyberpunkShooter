@@ -16,7 +16,7 @@ TILE_SIZE = 32
 TILE_TYPES = 42
 level = 1
 screen_scroll = 0
-start_game = False
+
 
 
 
@@ -30,10 +30,18 @@ money_img = pygame.transform.scale(money_img, (money_img.get_width() * 0.8, mone
 background = pygame.image.load('media/map/level1/level4.png')
 
 # menu background
-menu_background_1 =  pygame.image.load('media/map/menu/background_1.png')
-menu_background_2 =  pygame.image.load('media/map/menu/background_2.png')
-menu_background_3 =  pygame.image.load('media/map/menu/background_3.png')
-menu_background_4 =  pygame.image.load('media/map/menu/background_4.png')
+menu_background_1 =  pygame.image.load('media/map/menu/background/background_1.png')
+menu_background_2 =  pygame.image.load('media/map/menu/background/background_2.png')
+menu_background_3 =  pygame.image.load('media/map/menu/background/background_3.png')
+menu_background_4 =  pygame.image.load('media/map/menu/background/background_4.png')
+
+# menu buttons
+menu_button_start = pygame.image.load('media/map/menu/buttons/button_start.png')
+menu_button_quit = pygame.image.load('media/map/menu/buttons/button_quit.png')
+
+#level buttons
+retry_button = pygame.image.load('media/map/level_buttons/retry.png')
+
 
 #define colours
 BG = (144, 201, 120)

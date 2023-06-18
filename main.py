@@ -6,6 +6,8 @@ from groups import *
 from grenade import Grenade
 from static_objects import *
 from globals import g
+from button import Button
+
 
 pygame.init()
 
@@ -17,18 +19,28 @@ def draw_bg(bg_scroll):
         screen.blit(background, ((x * width) - bg_scroll * 1, 0))
         
 def draw_menu_bg(menu_bg_scroll):
-    screen.fill(GRAY)
+    screen.fill(BLACK)
+    width = menu_background_1.get_width()
+    for x in range(5):
+        screen.blit(menu_background_1, ((x * width) - menu_bg_scroll * 0.5, 0))
+        screen.blit(menu_background_2, ((x * width) - menu_bg_scroll * 0.8, SCREEN_HEIGHT - menu_background_2.get_height()))
+        screen.blit(menu_background_3, ((x * width) - menu_bg_scroll * 1, SCREEN_HEIGHT - menu_background_3.get_height()))
+        screen.blit(menu_background_4, ((x * width) - menu_bg_scroll * 1.5, SCREEN_HEIGHT - menu_background_4.get_height()))
 
-    width = SCREEN_WIDTH
-    for x in range(-5, 5):
-        screen.blit(menu_background_1, (x * width, 0))
-    for x in range(-5, 5):
-        if (x * width * 2) - menu_bg_scroll * 1.5 + width > 0:
-            screen.blit(menu_background_2, ((x * width * 2) - menu_bg_scroll * 1.2, 0))
-        if (x * width * 3) - menu_bg_scroll * 2 + width > 0:
-            screen.blit(menu_background_3, ((x * width * 3) - menu_bg_scroll * 1.4, 0))
-        if (x * width * 4) - menu_bg_scroll * 3 + width > 0:
-            screen.blit(menu_background_4, ((x * width * 4) - menu_bg_scroll * 2, 0))
+# #reset level
+def reset_level():
+    global world, player, healthbar
+    # Reset object groups
+    enemy_group.empty()
+    bullet_group.empty()
+    grenade_group.empty()
+    explosion_group.empty()
+    item_box_group.empty()
+    
+    # new_world = world.load_map('level3_przeszkody.csv')
+    
+    world, player, healthbar = reset_static_objects()
+
 
 
 def main():
@@ -43,9 +55,12 @@ def main():
     grenade = False
     grenade_thrown = False
     bg_scroll = 0
+    start_game = False
 
-    
-    
+    #buttons
+    start_button = Button(100, 100, menu_button_start)
+    quit_button = Button(100, 200, menu_button_quit)
+    level_retry_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, retry_button, 3)
     text_points = Text(player, BLACK, 60, 118, font_size=24)
 
     run = True
@@ -54,10 +69,15 @@ def main():
         clock.tick(FPS)
         
         if start_game == False:
-            g.bg_scroll_menu += 0.8
-            
+            g.bg_scroll_menu += 2
             draw_menu_bg(g.bg_scroll_menu)
-            pass
+            start_button.draw(screen)
+            quit_button.draw(screen)
+            for event in pygame.event.get():
+                if start_button.is_clicked(event):
+                    start_game = True
+                if quit_button.is_clicked(event):
+                    run = False
         else:
         
         
@@ -130,6 +150,10 @@ def main():
                 
                 g.screen_scroll = player.move(moving_left, moving_right)
                 bg_scroll -= g.screen_scroll
+            else:
+                if level_retry_button.draw(screen):
+                    g.screen_scroll = 0
+                    bg_scroll = 0
         
         for event in pygame.event.get():
             #quit game
@@ -161,7 +185,18 @@ def main():
                 if event.key == pygame.K_SPACE:
                     shoot = False
                 if event.key == pygame.K_g:
-                    grenade = False   
+                    grenade = False
+                    
+            if level_retry_button.is_clicked(event):
+                g.screen_scroll = 0
+                bg_scroll = 0
+                print("CLICKED")
+                start_game = False
+                reset_level()
+                # world_data = reset_level()
+                # player, healthbar = world.process_tiles(world_data)
+                
+
                 
 
 

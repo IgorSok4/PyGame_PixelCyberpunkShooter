@@ -119,12 +119,16 @@ class MainCharacter(pygame.sprite.Sprite):
                 elif self.vel_y >= 0:
                     self.in_air = False
                     dy = tile[1].top - self.rect.bottom
+                    
+                    
+        #if fallen out of the map
+        if self.rect.bottom > SCREEN_HEIGHT:
+            self.health = 0
 
         # update rectangle position
         self.rect.x += dx
         self.rect.y += dy
 
-        #scroll
         #scroll
         if self.char_type == 'player':
             if (self.rect.right > self.scroll_start and moving_right) and self.rect.right < COLS*32:
