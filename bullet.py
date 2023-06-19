@@ -19,7 +19,7 @@ class Bullet(pygame.sprite.Sprite):
         
     def update(self):
         from static_objects import world, player
-        from game_world import Enemy
+        from game_world import Enemy, EnemyBoss, EnemySergant
         #move bullet
         self.rect.x += (self.direction * self.speed) + screen_scroll
         #bullet out of screen
@@ -43,7 +43,8 @@ class Bullet(pygame.sprite.Sprite):
                 self.kill()
         for enemy in enemy_group:        
             if pygame.sprite.spritecollide(enemy, bullet_group, False):
-                if isinstance(self.shooter, Enemy):
+                if isinstance(self.shooter, Enemy) or isinstance(self.shooter, EnemySergant)\
+                    or isinstance(self.shooter, EnemyBoss):
                     # print("bot nie dostal, a mogl dostac")
                     pass
                 elif enemy.alive:

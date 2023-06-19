@@ -611,7 +611,7 @@ class EnemyBoss(MainCharacter):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
             bullet = Bullet(self.rect.centerx + int(0.75 * self.rect.size[0] * self.direction),\
-                            self.rect.centery - int(0.22 * self.rect.size[0]-30), self.direction, self, bullet_enemy)
+                            self.rect.centery - int(0.22 * self.rect.size[0]-30), self.direction, self, bullet_enemy, bullet_damage=10)
             bullet_group.add(bullet)
             self.ammo -= 1
             boss_shoot_sound.play()
