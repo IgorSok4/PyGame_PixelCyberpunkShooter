@@ -1,4 +1,5 @@
 import pygame
+from pygame import mixer
 
 from settings import *
 from text import Text
@@ -7,8 +8,9 @@ from grenade import Grenade
 from static_objects import *
 from globals import g
 from button import Button
+# from screen_transitions import ScreenTransition
 
-
+mixer.init()
 pygame.init()
 
 
@@ -63,6 +65,7 @@ def main():
     collected_money = 0
     
     menu_state = "main"
+    pygame.mixer.music.play(-1, 0.0, 5000)
 
     #buttons
     start_button = Button(100, 100, menu_button_start, 2)
@@ -72,8 +75,9 @@ def main():
     level_3_button = Button(100, 300, menu_button_level_3, 2)
     return_button = Button(10, 10, menu_button_return, 1)
     level_retry_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, retry_button, 3)
+    # transition = ScreenTransition(screen)
+    text_points = Text(player, BLACK, 60, 118, font_size=24)
     
-
     run = True
     while run:
         
@@ -116,19 +120,17 @@ def main():
                     if level_1_button.is_clicked(event):
                         g.level = 1
                         collected_money += player.money
-                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
                         reset_level()
                         start_game = True
                     if level_2_button.is_clicked(event):
                         g.level = 2
                         collected_money += player.money
-                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
+                        
                         reset_level()
                         start_game = True
                     if level_3_button.is_clicked(event):
                         g.level = 3
                         collected_money += player.money
-                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
                         reset_level()
                         start_game = True
         else:
@@ -169,8 +171,8 @@ def main():
             screen.blit(money_img, (10, 100))
             text_points.draw(screen)
             
-            print(f'collected_money {collected_money}')
-            print(f'player.money {player.money}')
+            # print(f'collected_money {collected_money}')
+            # print(f'player.money {player.money}')
             
             #update and draw groups
             bullet_group.update()
@@ -197,6 +199,7 @@ def main():
                 elif grenade and grenade_thrown == False and player.grenades > 0:
                     grenade = Grenade(player.rect.centerx + int(0.95 * player.rect.size[0] * player.direction),\
                                     player.rect.centery - int(0.7 * player.rect.size[0]), player.direction)
+                    grenade_explosion_sound.play()
                     grenade_group.add(grenade)
                     grenade_thrown = True
                     player.grenades -= 1
@@ -221,9 +224,11 @@ def main():
             # keyboard presses
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_a:
+                    biker_walk_sound.play()
                     moving_left = True
                 if event.key == pygame.K_d:
-                    moving_right = True
+                    biker_walk_sound.play()
+                    moving_right = True    
                 if event.key == pygame.K_w and player.alive:
                     player.jump = True
                 if event.key == pygame.K_SPACE:

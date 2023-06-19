@@ -156,9 +156,10 @@ class MainCharacter(pygame.sprite.Sprite):
         if self.shoot_cooldown == 0 and self.ammo > 0:
             self.shoot_cooldown = 20
             bullet = Bullet(self.rect.centerx + int(0.75 * self.rect.size[0] * self.direction),\
-                            self.rect.centery - int(0.22 * self.rect.size[0]), self.direction, self)
+                            self.rect.centery - int(0.22 * self.rect.size[0]), self.direction, self, bullet_img)
             bullet_group.add(bullet)
             self.ammo -= 1
+            biker_shoot_sound.play()
         
         
     def update_animation(self):
@@ -321,6 +322,16 @@ class Enemy(MainCharacter):
             self.update_action(2)
             
             
+    def shoot(self):
+        if self.shoot_cooldown == 0 and self.ammo > 0:
+            self.shoot_cooldown = 20
+            bullet = Bullet(self.rect.centerx + int(0.75 * self.rect.size[0] * self.direction),\
+                            self.rect.centery - int(0.22 * self.rect.size[0]), self.direction, self, bullet_enemy)
+            bullet_group.add(bullet)
+            self.ammo -= 1
+            officer_shoot_sound.play()
+            
+            
            
            
             
@@ -329,7 +340,7 @@ class EnemySergant(MainCharacter):
         super().__init__(x, y, scale, speed)
         self.char_type = char_type
         self.pers_type = pers_type
-        self.health = 200
+        self.health = 300
         self.attack_cooldown = 0
         self.animation_list = []
         self.is_attacking = False
@@ -341,7 +352,7 @@ class EnemySergant(MainCharacter):
         
 
         
-        animation_types = ['idle', 'walk', 'death', 'attack', 'hit']
+        animation_types = ['idle', 'walk', 'death', 'attack']
         
         for animation in animation_types:
             # temp_list resets temporaty list of images
@@ -361,18 +372,14 @@ class EnemySergant(MainCharacter):
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-    
-    
+        
+        
     def update(self):
-        if self.is_hit:
-            self.update_action(4)
-            self.is_hit = False
-
         self.update_animation()
         self.check_alive()
         #update cooldown
-        if self.shoot_cooldown > 0:
-            self.shoot_cooldown -= 1
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
         
         
 

@@ -1,6 +1,6 @@
 import pygame
 
-from settings import TILE_SIZE, screen_scroll
+from settings import *
 from globals import g
 
 
@@ -53,6 +53,8 @@ class ItemBox(pygame.sprite.Sprite):
                 self.counter = 0
                 # continue the animation even when player is not colliding
                 if self.item_type == "grenade_box":
+                    if self.frame_index == 0:
+                        item_pickup_sound.play()
                     if not self.item_taken:
                         self.frame_index += 1    
                         player.grenades += 2
@@ -65,6 +67,8 @@ class ItemBox(pygame.sprite.Sprite):
                     if self.frame_index == 5:
                         self.item_taken = True
                 elif self.item_type == "ammo_box":
+                    if self.frame_index == 2:
+                        biker_reload_sound.play()
                     if not self.item_taken:
                         self.frame_index += 1 
                         player.ammo += 20

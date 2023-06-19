@@ -4,14 +4,12 @@ from settings import *
 from groups import *
 
 
-#load images
-bullet_img = pygame.image.load('media/bullet/ak.png')
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction, shooter):
+    def __init__(self, x, y, direction, shooter, bullet_image):
         pygame.sprite.Sprite.__init__(self)
         self.speed = 23
-        self.image = bullet_img
+        self.image = bullet_image
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.direction = direction
