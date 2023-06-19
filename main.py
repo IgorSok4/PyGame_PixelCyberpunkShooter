@@ -186,6 +186,13 @@ def main():
             screen.blit(money_img, (10, 100))
             text_points.draw(screen)
             
+            if player.money >= 50:
+                player.health += 50
+                if player.health > 100:
+                    player.health = player.max_health
+                player.money -= 50
+                
+            
             # print(f'collected_money {collected_money}')
             # print(f'player.money {player.money}')
             

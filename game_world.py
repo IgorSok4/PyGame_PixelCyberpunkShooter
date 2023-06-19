@@ -2,7 +2,7 @@ import pygame
 import random
 import csv
 
-from characters import MainCharacter, Enemy, EnemySergant
+from characters import MainCharacter, Enemy, EnemySergant, EnemyBoss
 from settings import TILE_TYPES, screen, exit_sign
 from groups import *
 from healthbar import HealthBar
@@ -72,9 +72,14 @@ class World:
                     elif tile == 42: #create sergant
                         enemy = EnemySergant(x * TILE_SIZE, y * TILE_SIZE, 1.5, 3)
                         enemy_group.add(enemy)
+                    elif tile == 46:
+                        enemy = EnemyBoss(x * TILE_SIZE, y * TILE_SIZE, 1.5, 3)
+                        enemy_group.add(enemy)
                     elif tile == 43: #exit level
                         exit_sign = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
                         self.decoration_list.append(exit_sign)
+                   
+                        
 
         
 

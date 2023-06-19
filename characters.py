@@ -385,14 +385,6 @@ class EnemySergant(MainCharacter):
         if self.attack_cooldown > 0:
             self.attack_cooldown -= 1
         
-        
-
-    def attack(self):
-        from static_objects import player
-        if self.attack_cooldown == 0:
-            player.health -= 5
-            self.attack_cooldown = 20
-            self.is_attacking = True
 
     def ai(self):
         from static_objects import player
@@ -491,5 +483,135 @@ class EnemySergant(MainCharacter):
 
             
             
+class EnemyBoss(MainCharacter):
+    def __init__(self, x, y, scale, speed, char_type="enemy", pers_type="boss"):
+        super().__init__(x, y, scale, speed)
+        self.char_type = char_type
+        self.pers_type = pers_type
+        self.health = 1000
+        self.ammo = 2000
+        self.shoot_cooldown = 0
+        self.animation_list = []
+        self.is_attacking = False
+        self.grenade_cooldown = 0
+        self.sayonara = False
+        #ai
+        self.move_counter = 0
+        self.idling = True
+        self.idling_counter = 0
+        self.vision = pygame.Rect(0, 0, 1000, 200)
+        
+
+        
+        animation_types = ['idle', 'walk', 'death', 'shoot']
+        
+        for animation in animation_types:
+            temp_list = []
+            folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
+            file_count = len(glob.glob(folder_path + '/*'))
+            for i in range(file_count):
+                img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
     
+        
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        
+
+    def update(self):
+        self.update_animation()
+        self.check_alive()
+        #update cooldown
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
+        if self.grenade_cooldown > 0:
+            self.grenade_cooldown -= 1
+        
+        
+    def ai(self):
+        from static_objects import player
+        from grenade import Grenade
+        if self.alive and player.alive:   
+            if self.idling == False and random.randint(1, 100) == 10:
+                self.update_action(0) #idling
+                self.idling = True
+                self.idling_counter = random.randint(20, 200)
+            #if ai in near the player
+            if self.vision.colliderect(player.rect):
+                self.update_action(3) #shoot
+                self.shoot()
+                if random.randint(0,100) <= 1 and self.grenade_cooldown == 0:
+                    self.grenade_cooldown = 200
+                    grenade = Grenade(self.rect.centerx + int(0.95 * self.rect.size[0] * self.direction),\
+                                    self.rect.centery - int(0.7 * self.rect.size[0]), self.direction)
+                    grenade_explosion_sound.play()
+                    grenade_group.add(grenade)
+            else:
+                if self.idling == False:
+                    if self.direction == 1:
+                        ai_move_right = True
+                    else:
+                        ai_move_right = False
+                    ai_move_left = not ai_move_right
+                    self.move(ai_move_left, ai_move_right)
+                    self.update_action(1) #run
+                    self.move_counter += 0.5
+                    #update vision with move
+                    if self.direction == 1:  # If the enemy is looking right
+                            self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 700, 50)
+                    else:  # If the enemy is looking left
+                        self.vision = pygame.Rect(self.rect.centerx - 700, self.rect.centery, 700, 50)
+                    # pygame.draw.rect(screen, RED, self.vision)
+                    if self.move_counter > TILE_SIZE:
+                        self.direction *= -1
+                        self.move_counter *= -0.5
+                else:
+                    self.idling_counter -= 1
+                    if self.idling_counter <= 0:
+                        self.idling = False
+
+        #scroll
+        self.rect.x += g.screen_scroll
+        
+        
+    def update_animation(self):
+        ANIMATION_COOLDOWN = 100
+        #update image depeding on current frame
+        self.image = self.animation_list[self.action][self.frame_index]
+        # check if enought time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+        # index error fix
+        if self.frame_index >= len(self.animation_list[self.action]):
+            if self.action == 2:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+            else:
+                self.frame_index = 0
+        
+        
+    def check_alive(self):
+        from explosions import Explosion
+        if self.health <= 0:
+            self.health = 0
+            self.speed = 0
+            self.alive = False
+            self.update_action(2)
+            if self.sayonara == False:
+                explosion = Explosion(self.rect.x, self.rect.y+30, 1, self.rect, frame_index=4)
+                explosion_group.add(explosion)
+                self.sayonara = True
             
+            
+            
+    def shoot(self):
+        if self.shoot_cooldown == 0 and self.ammo > 0:
+            self.shoot_cooldown = 20
+            bullet = Bullet(self.rect.centerx + int(0.75 * self.rect.size[0] * self.direction),\
+                            self.rect.centery - int(0.22 * self.rect.size[0]-30), self.direction, self, bullet_enemy)
+            bullet_group.add(bullet)
+            self.ammo -= 1
+            boss_shoot_sound.play()

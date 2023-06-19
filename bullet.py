@@ -6,7 +6,7 @@ from groups import *
 
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction, shooter, bullet_image):
+    def __init__(self, x, y, direction, shooter, bullet_image, bullet_damage=5):
         pygame.sprite.Sprite.__init__(self)
         self.speed = 23
         self.image = bullet_image
@@ -14,6 +14,7 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.direction = direction
         self.shooter = shooter
+        self.bullet_damage = bullet_damage
         
         
     def update(self):
@@ -38,7 +39,7 @@ class Bullet(pygame.sprite.Sprite):
             if player.alive:
                 # print("Player dostal")
                 player.is_hit = True
-                player.health -= 5
+                player.health -= self.bullet_damage
                 self.kill()
         for enemy in enemy_group:        
             if pygame.sprite.spritecollide(enemy, bullet_group, False):

@@ -6,7 +6,7 @@ from static_objects import *
 from globals import g
 
 class Explosion(pygame.sprite.Sprite):
-    def __init__(self, x, y, scale, grenade_rect):
+    def __init__(self, x, y, scale, grenade_rect, frame_index=0):
         pygame.sprite.Sprite.__init__(self)
         #list of photos
         self.images = []
@@ -15,7 +15,7 @@ class Explosion(pygame.sprite.Sprite):
             img = pygame.transform.scale(img, (int(img.get_width() * 2.5), int(img.get_height() * 2.5)))
             self.images.append(img)
         # print(len(self.images))
-        self.frame_index = 0
+        self.frame_index = frame_index
         self.image = self.images[self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -24,7 +24,7 @@ class Explosion(pygame.sprite.Sprite):
         
         
     def update(self):
-        from static_objects import player, world
+        from static_objects import player
         self.rect.x += g.screen_scroll
         EXPLOSION_SPEED = 7  #speed of an animation
         #update animation

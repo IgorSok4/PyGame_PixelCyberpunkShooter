@@ -14,10 +14,10 @@ pygame.display.set_caption('PixelCyberpunk')
 #game variables
 GRAVITY = 0.75
 SCROLL_THRESH = 200
-ROWS = 21
+ROWS = 22
 COLS = 96
 TILE_SIZE = 32
-TILE_TYPES = 46
+TILE_TYPES = 47
 # level = 1
 screen_scroll = 0
 
@@ -63,6 +63,8 @@ biker_shoot_sound = pygame.mixer.Sound('media/sounds/biker_rifle_shoot_sound.mp3
 biker_shoot_sound.set_volume(0.1)
 officer_shoot_sound = pygame.mixer.Sound('media/sounds/officer_rifle_shoot_sound.mp3')
 officer_shoot_sound.set_volume(0.2)
+boss_shoot_sound = pygame.mixer.Sound('media/sounds/boss_shoot_sound.mp3')
+boss_shoot_sound.set_volume(0.5)
 grenade_explosion_sound = pygame.mixer.Sound('media/sounds/grenade_explosion.mp3')
 grenade_explosion_sound.set_volume(0.3)
 biker_walk_sound = pygame.mixer.Sound('media/sounds/biker_walk.mp3')

@@ -63,16 +63,16 @@ class Grenade(pygame.sprite.Sprite):
         self.timer -= 1
         if self.timer <= 0:
             self.kill()
-            explosion = Explosion(self.rect.x, self.rect.y, 1, self.rect)
+            explosion = Explosion(self.rect.x, self.rect.y, 1, self.rect, 0)
             explosion_group.add(explosion)
             #damage
             distance_to_player = max(abs(self.rect.centerx - player.rect.centerx), abs(self.rect.centery - player.rect.centery))
             if distance_to_player < TILE_SIZE * 3:
-                damage_ratio = (TILE_SIZE * 3 - distance_to_player) / (TILE_SIZE * 3)  # to create a ratio between 0 and 1
+                damage_ratio = (TILE_SIZE * 3 - distance_to_player) / (TILE_SIZE * 3)
                 player.health -= 10 * damage_ratio  # scale the damage accordingly
 
             for enemy in enemy_group:
                 distance_to_enemy = max(abs(self.rect.centerx - enemy.rect.centerx), abs(self.rect.centery - enemy.rect.centery))
                 if distance_to_enemy < TILE_SIZE * 3:
-                    damage_ratio = (TILE_SIZE * 3 - distance_to_enemy) / (TILE_SIZE * 3)  # to create a ratio between 0 and 1
-                    enemy.health -= 10 * damage_ratio  # scale the damage accordingly
+                    damage_ratio = (TILE_SIZE * 3 - distance_to_enemy) / (TILE_SIZE * 3) 
+                    enemy.health -= 10 * damage_ratio 
