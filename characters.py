@@ -30,6 +30,7 @@ class MainCharacter(pygame.sprite.Sprite):
         self.jump = False
         self.in_air = True
         self.flip = False
+        self.is_hit = False
         self.animation_list = []
         self.frame_index = 0
         self.action = 0
@@ -65,6 +66,10 @@ class MainCharacter(pygame.sprite.Sprite):
         
         
     def update(self):
+        if self.is_hit:
+            self.update_action(5)
+            self.is_hit = False
+
         self.update_animation()
         self.check_alive()
         #update cooldown
@@ -232,6 +237,17 @@ class Enemy(MainCharacter):
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         
+
+    def update(self):
+        if self.is_hit:
+            self.update_action(4)
+            self.is_hit = False
+
+        self.update_animation()
+        self.check_alive()
+        #update cooldown
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
         
         
     def ai(self):
@@ -240,9 +256,6 @@ class Enemy(MainCharacter):
             if self.idling == False and random.randint(1, 100) == 10:
                 self.update_action(0) #idling
                 self.idling = True
-                # if self.ai_status == "off":
-                #     self.idling_counter = random.randint(500, 2000)
-                # else:
                 self.idling_counter = random.randint(20, 100)
             #if ai in near the player
             if self.vision.colliderect(player.rect):
@@ -319,6 +332,7 @@ class EnemySergant(MainCharacter):
         self.health = 200
         self.attack_cooldown = 0
         self.animation_list = []
+        self.is_attacking = False
         #ai
         self.move_counter = 0
         self.idling = True
@@ -327,7 +341,7 @@ class EnemySergant(MainCharacter):
         
 
         
-        animation_types = ['idle', 'walk', 'death', 'attack']
+        animation_types = ['idle', 'walk', 'death', 'attack', 'hit']
         
         for animation in animation_types:
             # temp_list resets temporaty list of images
@@ -347,67 +361,84 @@ class EnemySergant(MainCharacter):
         self.image = self.animation_list[self.action][self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        
-        
+    
+    
     def update(self):
+        if self.is_hit:
+            self.update_action(4)
+            self.is_hit = False
+
         self.update_animation()
         self.check_alive()
         #update cooldown
-        if self.attack_cooldown > 0:
-            self.attack_cooldown -= 1
+        if self.shoot_cooldown > 0:
+            self.shoot_cooldown -= 1
         
         
+
+    def attack(self):
+        from static_objects import player
+        if self.attack_cooldown == 0:
+            player.health -= 5
+            self.attack_cooldown = 20
+            self.is_attacking = True
 
     def ai(self):
         from static_objects import player
         if self.alive and player.alive:
-            # If EnemySergant collides with player, it starts to attack
             if self.rect.colliderect(player.rect):
                 self.update_action(3) #attack
                 self.attack()
-
                 return
-            if self.vision.colliderect(player.rect):
-                # Player is in sight
-                if self.rect.centerx < player.rect.centerx:
-                    self.direction = 1
-                    ai_move_right = True
-                    ai_move_left = False
-                else:
-                    self.direction = -1
-                    ai_move_right = False
-                    ai_move_left = True
-                self.move(ai_move_left, ai_move_right)
-                self.update_action(1) #walk
-            else:
-                # patrol
-                if self.idling == False:
-                    if self.direction == 1:
+            
+            if not self.is_attacking:
+                if self.vision.colliderect(player.rect):
+                    # Player is in sight
+                    if self.rect.centerx < player.rect.centerx:
+                        self.direction = 1
                         ai_move_right = True
+                        ai_move_left = False
                     else:
+                        self.direction = -1
                         ai_move_right = False
-                    ai_move_left = not ai_move_right
+                        ai_move_left = True
                     self.move(ai_move_left, ai_move_right)
-                    self.update_action(1) #run
-                    self.move_counter += 1
-                    #update vision with move
-                    if self.direction == 1:  # If the enemy is looking right
-                        self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 200, 20)
-                    else:  # If the enemy is looking left
-                        self.vision = pygame.Rect(self.rect.centerx - 200, self.rect.centery, 200, 20)
-                    if self.move_counter > TILE_SIZE // 2:
-                        self.direction *= -1
-                        self.move_counter *= -1
-                        self.idling = True
-                        self.update_action(0)
-                        self.idling_counter = random.randint(100, 200)
+                    self.update_action(1) #walk
                 else:
-                    self.idling_counter -= 1
-                    if self.idling_counter <= 0:
-                        self.idling = False
+                    # patrol
+                    if self.idling == False:
+                        if self.direction == 1:
+                            ai_move_right = True
+                        else:
+                            ai_move_right = False
+                        ai_move_left = not ai_move_right
+                        self.move(ai_move_left, ai_move_right)
+                        self.update_action(1) #run
+                        self.move_counter += 1
+                        #update vision with move
+                        if self.direction == 1:  # If the enemy is looking right
+                            self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 200, 20)
+                        else:  # If the enemy is looking left
+                            self.vision = pygame.Rect(self.rect.centerx - 200, self.rect.centery, 200, 20)
+                        if self.move_counter > TILE_SIZE // 2:
+                            self.direction *= -1
+                            self.move_counter *= -1
+                            self.idling = True
+                            self.update_action(0)
+                            self.idling_counter = random.randint(100, 200)
+                    else:
+                        self.idling_counter -= 1
+                        if self.idling_counter <= 0:
+                            self.idling = False
+            
+            distance_to_player = abs(self.rect.centerx - player.rect.centerx)
+            if distance_to_player > self.rect.width:
+                # reset is_attacking when the player is not close
+                self.is_attacking = False
 
         #scroll
         self.rect.x += g.screen_scroll
+
 
 
         
@@ -440,7 +471,9 @@ class EnemySergant(MainCharacter):
         from static_objects import player
         if self.attack_cooldown == 0:
             player.health -= 5
-            self.attack_cooldown = 20
+            player.is_hit = True
+            self.attack_cooldown = 35
+            self.is_attacking = True
 
             
             

@@ -39,7 +39,7 @@ class Bullet(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(player, bullet_group, False):
             if player.alive:
                 # print("Player dostal")
-                player.update_action(5)
+                player.is_hit = True
                 player.health -= 5
                 self.kill()
         for enemy in enemy_group:        
@@ -48,6 +48,7 @@ class Bullet(pygame.sprite.Sprite):
                     # print("bot nie dostal, a mogl dostac")
                     pass
                 elif enemy.alive:
+                    enemy.is_hit = True
                     enemy.health -= 50
                     self.kill()
                     

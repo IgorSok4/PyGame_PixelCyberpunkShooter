@@ -29,7 +29,11 @@ def draw_menu_bg(menu_bg_scroll):
 
 # #reset level
 def reset_level():
-    global world, player, healthbar
+    global world, player, healthbar, moving_left, moving_right
+    # reset moving flags
+    moving_left = False
+    moving_right = False
+    
     # Reset object groups
     enemy_group.empty()
     bullet_group.empty()
@@ -56,6 +60,8 @@ def main():
     grenade_thrown = False
     bg_scroll = 0
     start_game = False
+    collected_money = 0
+    
     menu_state = "main"
 
     #buttons
@@ -66,12 +72,24 @@ def main():
     level_3_button = Button(100, 300, menu_button_level_3, 2)
     return_button = Button(10, 10, menu_button_return, 1)
     level_retry_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, retry_button, 3)
-    text_points = Text(player, BLACK, 60, 118, font_size=24)
+    
 
     run = True
     while run:
         
         clock.tick(FPS)
+        
+        #check for level exit
+        for tile in world.decoration_list:
+            if isinstance(tile, pygame.Rect):
+                if player.rect.colliderect(tile):
+                    g.screen_scroll = 0
+                    bg_scroll = 0
+                    start_game = False
+                    moving_right = False
+                    collected_money += player.money
+                    reset_level()
+
         # print(f'id(player: {id(player)}')
         if start_game == False:
             if menu_state == 'main':
@@ -97,14 +115,20 @@ def main():
                         menu_state = 'main'
                     if level_1_button.is_clicked(event):
                         g.level = 1
+                        collected_money += player.money
+                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
                         reset_level()
                         start_game = True
                     if level_2_button.is_clicked(event):
                         g.level = 2
+                        collected_money += player.money
+                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
                         reset_level()
                         start_game = True
                     if level_3_button.is_clicked(event):
                         g.level = 3
+                        collected_money += player.money
+                        text_points = Text(player.money, BLACK, 60, 118, font_size=24)
                         reset_level()
                         start_game = True
         else:
@@ -144,7 +168,9 @@ def main():
             #show money
             screen.blit(money_img, (10, 100))
             text_points.draw(screen)
-
+            
+            print(f'collected_money {collected_money}')
+            print(f'player.money {player.money}')
             
             #update and draw groups
             bullet_group.update()
@@ -158,12 +184,6 @@ def main():
             explosion_group.draw(screen)
             
             
-            #check for level exit
-            for tile in world.decoration_list:
-                if isinstance(tile, pygame.Rect):
-                    if player.rect.colliderect(tile):
-                        reset_level()
-                        start_game = False
 
             
             #update player actions
@@ -171,7 +191,8 @@ def main():
                 #shoot
                 if shoot:
                     player.shoot()
-                    player.update_action(4)
+                    if player.ammo > 0:
+                        player.update_action(4)
                 #grenades
                 elif grenade and grenade_thrown == False and player.grenades > 0:
                     grenade = Grenade(player.rect.centerx + int(0.95 * player.rect.size[0] * player.direction),\

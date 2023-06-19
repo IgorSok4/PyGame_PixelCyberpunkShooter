@@ -8,8 +8,8 @@ from globals import g
 class Explosion(pygame.sprite.Sprite):
     def __init__(self, x, y, scale, grenade_rect):
         pygame.sprite.Sprite.__init__(self)
+        #list of photos
         self.images = []
-        #loading photos to create animation
         for i in range(0, 12):
             img = pygame.image.load(f'media/other/grenade/explosion/{i}.png')
             img = pygame.transform.scale(img, (int(img.get_width() * 2.5), int(img.get_height() * 2.5)))
@@ -29,7 +29,7 @@ class Explosion(pygame.sprite.Sprite):
         EXPLOSION_SPEED = 7  #speed of an animation
         #update animation
         self.counter += 1
-        print(self.counter)
+        # print(self.counter)
         
         if self.counter >= EXPLOSION_SPEED:
             self.counter = 0
@@ -45,6 +45,7 @@ class Explosion(pygame.sprite.Sprite):
             if distance_to_player < TILE_SIZE * 4:
                 damage_ratio = (TILE_SIZE * 4 - distance_to_player) / (TILE_SIZE * 4)
                 player.health -= 50 * damage_ratio
+                player.is_hit = True
 
             for enemy in enemy_group:
                 distance_to_enemy = max(abs(self.grenade_rect.centerx - enemy.rect.centerx),
@@ -52,3 +53,4 @@ class Explosion(pygame.sprite.Sprite):
                 if distance_to_enemy < TILE_SIZE * 4:
                     damage_ratio = (TILE_SIZE * 4 - distance_to_enemy) / (TILE_SIZE * 4)
                     enemy.health -= 50 * damage_ratio
+                    enemy.is_hit = True
