@@ -157,6 +157,15 @@ def main():
             item_box_group.draw(screen)
             explosion_group.draw(screen)
             
+            
+            #check for level exit
+            for tile in world.decoration_list:
+                if isinstance(tile, pygame.Rect):
+                    if player.rect.colliderect(tile):
+                        reset_level()
+                        start_game = False
+
+            
             #update player actions
             if player.alive:
                 #shoot

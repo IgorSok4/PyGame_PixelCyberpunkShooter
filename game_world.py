@@ -2,8 +2,8 @@ import pygame
 import random
 import csv
 
-from characters import MainCharacter, Enemy
-from settings import TILE_TYPES, screen
+from characters import MainCharacter, Enemy, EnemySergant
+from settings import TILE_TYPES, screen, exit_sign
 from groups import *
 from healthbar import HealthBar
 from itemboxes import *
@@ -69,14 +69,26 @@ class World:
                     elif tile == 41: #create grenade_box
                         item_box = ItemBox("grenade_box", x * TILE_SIZE, y * TILE_SIZE)
                         item_box_group.add(item_box)
+                    elif tile == 42: #create sergant
+                        enemy = EnemySergant(x * TILE_SIZE, y * TILE_SIZE, 1.5, 3)
+                        enemy_group.add(enemy)
+                    elif tile == 43: #exit level
+                        exit_sign = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+                        self.decoration_list.append(exit_sign)
+
         
 
         return player, healthbar
 
     def draw(self):
         for tile in self.decoration_list:
-            tile[1][0] += g.screen_scroll
-            screen.blit(tile[0], tile[1])
+            if isinstance(tile, tuple):
+                tile[1][0] += g.screen_scroll
+                screen.blit(tile[0], tile[1])
+            else:
+                tile.x += g.screen_scroll
+                screen.blit(exit_sign, (tile.x, tile.y))
+
         
         for tile in self.obstacle_list:
             tile[1][0] += g.screen_scroll

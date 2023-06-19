@@ -13,7 +13,7 @@ SCROLL_THRESH = 200
 ROWS = 21
 COLS = 96
 TILE_SIZE = 32
-TILE_TYPES = 42
+TILE_TYPES = 44
 # level = 1
 screen_scroll = 0
 
@@ -28,6 +28,7 @@ grenade_img = pygame.transform.scale(grenade_img, (grenade_img.get_width() * 1.5
 money_img = pygame.image.load('media/other/money/0.png')
 money_img = pygame.transform.scale(money_img, (money_img.get_width() * 0.8, money_img.get_height() * 0.8))
 background = pygame.image.load('media/map/level1/level4.png')
+exit_sign = pygame.image.load('media/map/level1/tiles/43.png')
 
 # menu background
 menu_background_1 =  pygame.image.load('media/map/menu/background/background_1.png')

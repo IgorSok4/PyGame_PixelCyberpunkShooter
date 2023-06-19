@@ -307,3 +307,142 @@ class Enemy(MainCharacter):
             self.alive = False
             self.update_action(2)
             
+            
+           
+           
+            
+class EnemySergant(MainCharacter):
+    def __init__(self, x, y, scale, speed, char_type="enemy", pers_type="sergant"):
+        super().__init__(x, y, scale, speed)
+        self.char_type = char_type
+        self.pers_type = pers_type
+        self.health = 200
+        self.attack_cooldown = 0
+        self.animation_list = []
+        #ai
+        self.move_counter = 0
+        self.idling = True
+        self.idling_counter = 0
+        self.vision = pygame.Rect(0, 0, 500, 20) #400 - enemies' sight
+        
+
+        
+        animation_types = ['idle', 'walk', 'death', 'attack']
+        
+        for animation in animation_types:
+            # temp_list resets temporaty list of images
+            temp_list = []
+            
+            # count amount of files (images) in folder - to use in for loop
+            folder_path = f'media/{self.char_type}/{self.pers_type}/{animation}'
+            file_count = len(glob.glob(folder_path + '/*'))
+            # print(f'{animation} : {file_count}')
+            for i in range(file_count):
+                img = pygame.image.load(f'media/{self.char_type}/{self.pers_type}/{animation}/{i}.png')
+                img = pygame.transform.scale(img, (int(img.get_width() * scale), int(img.get_height() * scale)))
+                temp_list.append(img)
+            self.animation_list.append(temp_list)
+    
+        
+        self.image = self.animation_list[self.action][self.frame_index]
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        
+        
+    def update(self):
+        self.update_animation()
+        self.check_alive()
+        #update cooldown
+        if self.attack_cooldown > 0:
+            self.attack_cooldown -= 1
+        
+        
+
+    def ai(self):
+        from static_objects import player
+        if self.alive and player.alive:
+            # If EnemySergant collides with player, it starts to attack
+            if self.rect.colliderect(player.rect):
+                self.update_action(3) #attack
+                self.attack()
+
+                return
+            if self.vision.colliderect(player.rect):
+                # Player is in sight
+                if self.rect.centerx < player.rect.centerx:
+                    self.direction = 1
+                    ai_move_right = True
+                    ai_move_left = False
+                else:
+                    self.direction = -1
+                    ai_move_right = False
+                    ai_move_left = True
+                self.move(ai_move_left, ai_move_right)
+                self.update_action(1) #walk
+            else:
+                # patrol
+                if self.idling == False:
+                    if self.direction == 1:
+                        ai_move_right = True
+                    else:
+                        ai_move_right = False
+                    ai_move_left = not ai_move_right
+                    self.move(ai_move_left, ai_move_right)
+                    self.update_action(1) #run
+                    self.move_counter += 1
+                    #update vision with move
+                    if self.direction == 1:  # If the enemy is looking right
+                        self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 200, 20)
+                    else:  # If the enemy is looking left
+                        self.vision = pygame.Rect(self.rect.centerx - 200, self.rect.centery, 200, 20)
+                    if self.move_counter > TILE_SIZE // 2:
+                        self.direction *= -1
+                        self.move_counter *= -1
+                        self.idling = True
+                        self.update_action(0)
+                        self.idling_counter = random.randint(100, 200)
+                else:
+                    self.idling_counter -= 1
+                    if self.idling_counter <= 0:
+                        self.idling = False
+
+        #scroll
+        self.rect.x += g.screen_scroll
+
+
+        
+        
+    def update_animation(self):
+        ANIMATION_COOLDOWN = 100
+        #update image depeding on current frame
+        self.image = self.animation_list[self.action][self.frame_index]
+        # check if enought time has passed since the last update
+        if pygame.time.get_ticks() - self.update_time > ANIMATION_COOLDOWN:
+            self.update_time = pygame.time.get_ticks()
+            self.frame_index += 1
+        # index error fix
+        if self.frame_index >= len(self.animation_list[self.action]):
+            if self.action == 2:
+                self.frame_index = len(self.animation_list[self.action]) - 1
+            else:
+                self.frame_index = 0
+        
+        
+    def check_alive(self):
+        if self.health <= 0:
+            self.health = 0
+            self.speed = 0
+            self.alive = False
+            self.update_action(2)
+            
+            
+    def attack(self):
+        from static_objects import player
+        if self.attack_cooldown == 0:
+            player.health -= 5
+            self.attack_cooldown = 20
+
+            
+            
+    
+            
