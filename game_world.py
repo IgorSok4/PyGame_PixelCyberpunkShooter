@@ -47,7 +47,7 @@ class World:
                     img_rect.x = x * TILE_SIZE
                     img_rect.y = y * TILE_SIZE
                     tile_data = (img, img_rect)
-                    if tile >= 0 and tile <= 16: 
+                    if tile >= 0 and tile <= 16 or 44 <= tile <= 45: 
                         self.obstacle_list.append(tile_data)
                     elif 17 <= tile <= 36:
                         self.decoration_list.append(tile_data)

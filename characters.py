@@ -160,6 +160,10 @@ class MainCharacter(pygame.sprite.Sprite):
             bullet_group.add(bullet)
             self.ammo -= 1
             biker_shoot_sound.play()
+        elif self.shoot_cooldown == 0 and self.ammo == 0:
+            self.shoot_cooldown = 20
+            biker_empty_mag_sound.play()
+            
         
         
     def update_animation(self):
@@ -268,7 +272,7 @@ class Enemy(MainCharacter):
                     else:
                         ai_move_right = False
                 else:
-                    self.update_action(3) #idling
+                    self.update_action(3) #shoot
                     self.shoot()
             else:
                 if self.idling == False:
@@ -299,7 +303,7 @@ class Enemy(MainCharacter):
         
         
     def update_animation(self):
-        ANIMATION_COOLDOWN = 100
+        ANIMATION_COOLDOWN = 80
         #update image depeding on current frame
         self.image = self.animation_list[self.action][self.frame_index]
         # check if enought time has passed since the last update
@@ -393,10 +397,13 @@ class EnemySergant(MainCharacter):
     def ai(self):
         from static_objects import player
         if self.alive and player.alive:
+            if self.idling == False and random.randint(1, 1000) == 10:
+                self.update_action(0)
+                self.idling = True
+                self.idling_counter = random.randint(20, 100)
             if self.rect.colliderect(player.rect):
                 self.update_action(3) #attack
                 self.attack()
-                return
             
             if not self.is_attacking:
                 if self.vision.colliderect(player.rect):
@@ -423,15 +430,15 @@ class EnemySergant(MainCharacter):
                         self.update_action(1) #run
                         self.move_counter += 1
                         #update vision with move
-                        if self.direction == 1:  # If the enemy is looking right
-                            self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 200, 20)
-                        else:  # If the enemy is looking left
-                            self.vision = pygame.Rect(self.rect.centerx - 200, self.rect.centery, 200, 20)
+                        if self.direction == 1:  # enemy looking right
+                            self.vision = pygame.Rect(self.rect.centerx, self.rect.centery, 400, 20)
+                        else:  # enemy looking left
+                            self.vision = pygame.Rect(self.rect.centerx - 200, self.rect.centery, 400, 20)
                         if self.move_counter > TILE_SIZE // 2:
                             self.direction *= -1
                             self.move_counter *= -1
                             self.idling = True
-                            self.update_action(0)
+                            self.update_action(0) #idling
                             self.idling_counter = random.randint(100, 200)
                     else:
                         self.idling_counter -= 1
@@ -442,7 +449,7 @@ class EnemySergant(MainCharacter):
             if distance_to_player > self.rect.width:
                 # reset is_attacking when the player is not close
                 self.is_attacking = False
-
+            
         #scroll
         self.rect.x += g.screen_scroll
 

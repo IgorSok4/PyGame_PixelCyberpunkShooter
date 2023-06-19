@@ -5,8 +5,12 @@ from globals import g
 
 world = World(img_list, f'level{g.level}_przeszkody.csv')
 
+
 player = world.player
 healthbar = world.healthbar
+
+collected_money = player.money
+# level = 1
 
 def reset_static_objects():
     global world, player, healthbar

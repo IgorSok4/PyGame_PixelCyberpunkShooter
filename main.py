@@ -15,6 +15,8 @@ pygame.init()
 
 
 def draw_bg(bg_scroll):
+    # print(f'background: {background}')
+    # print(f'g.level: {g.level}')
     screen.fill(BLACK)
     width = background.get_width()
     for x in range(2):
@@ -31,7 +33,7 @@ def draw_menu_bg(menu_bg_scroll):
 
 # #reset level
 def reset_level():
-    global world, player, healthbar, moving_left, moving_right
+    global world, player, healthbar, moving_left, moving_right, background
     # reset moving flags
     moving_left = False
     moving_right = False
@@ -43,13 +45,15 @@ def reset_level():
     explosion_group.empty()
     item_box_group.empty()
     
-    # new_world = world.load_map('level3_przeszkody.csv')
-    # print(f'id(player) reset_level: {id(player)}')
+    #update background
+    background = pygame.image.load(f'media/map/level1/level{g.level}.png')
+    #objects
     world, player, healthbar = reset_static_objects()
 
 
 
 def main():
+    global collected_money
     
     clock = pygame.time.Clock()
     FPS = 60
@@ -62,7 +66,6 @@ def main():
     grenade_thrown = False
     bg_scroll = 0
     start_game = False
-    collected_money = 0
     
     menu_state = "main"
     pygame.mixer.music.play(-1, 0.0, 5000)
@@ -70,13 +73,14 @@ def main():
     #buttons
     start_button = Button(100, 100, menu_button_start, 2)
     quit_button = Button(100, 200, menu_button_quit, 2)
+    sound_button = Button(200, 500, menu_button_sound_on, 1)
     level_1_button = Button(100, 100, menu_button_level_1, 2)
     level_2_button = Button(100, 200, menu_button_level_2, 2)
     level_3_button = Button(100, 300, menu_button_level_3, 2)
     return_button = Button(10, 10, menu_button_return, 1)
     level_retry_button = Button(SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 - 50, retry_button, 3)
     # transition = ScreenTransition(screen)
-    text_points = Text(player, BLACK, 60, 118, font_size=24)
+    text_points = Text(player.money, BLACK, 60, 118, font_size=24)
     
     run = True
     while run:
@@ -92,6 +96,7 @@ def main():
                     start_game = False
                     moving_right = False
                     collected_money += player.money
+                    text_points.update(collected_money, BLACK)
                     reset_level()
 
         # print(f'id(player: {id(player)}')
@@ -101,12 +106,19 @@ def main():
                 draw_menu_bg(g.bg_scroll_menu)
                 start_button.draw(screen)
                 quit_button.draw(screen)
+                sound_button.draw(screen)
                 for event in pygame.event.get():
                     if start_button.is_clicked(event):
-                        # start_game = True
                         menu_state = 'level'
                     if quit_button.is_clicked(event):
                         run = False
+                    if  sound_button.is_clicked(event):
+                        if pygame.mixer.music.get_busy():
+                            pygame.mixer.music.pause()
+                            sound_button.image = menu_button_sound_off
+                        else:
+                            pygame.mixer.music.unpause()
+                            sound_button.image = menu_button_sound_on
             if menu_state == 'level':
                 g.bg_scroll_menu += 2
                 draw_menu_bg(g.bg_scroll_menu)
@@ -120,17 +132,19 @@ def main():
                     if level_1_button.is_clicked(event):
                         g.level = 1
                         collected_money += player.money
+                        text_points.update(player.money, BLACK)
                         reset_level()
                         start_game = True
                     if level_2_button.is_clicked(event):
                         g.level = 2
                         collected_money += player.money
-                        
+                        text_points.update(player.money, BLACK)
                         reset_level()
                         start_game = True
                     if level_3_button.is_clicked(event):
                         g.level = 3
                         collected_money += player.money
+                        text_points.update(player.money, BLACK)
                         reset_level()
                         start_game = True
         else:
@@ -168,6 +182,7 @@ def main():
             for x in range(player.grenades):
                 screen.blit(grenade_img, (135 + (x * 15), 60))
             #show money
+            text_points.update(player.money, BLACK)
             screen.blit(money_img, (10, 100))
             text_points.draw(screen)
             

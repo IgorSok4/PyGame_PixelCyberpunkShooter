@@ -45,7 +45,7 @@ class Grenade(pygame.sprite.Sprite):
                 elif self.vel_y >= 0:  # hitting the bottom of the tile
                     dy = tile[1].top - self.rect.bottom
                     self.bounce_count += 1
-                    if self.bounce_count < 3:
+                    if self.bounce_count < 2:
                         self.vel_y = -self.bounce_height  # Change the direction of grenade's vertical speed
                         self.bounce_height *= self.bounce_ratio  # Decrease the bounce height
                     else:
