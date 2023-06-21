@@ -10,7 +10,6 @@ from itemboxes import *
 from globals import g
 
 
-# load images
 # tiles
 img_list = []
 for x in range(TILE_TYPES):
@@ -72,7 +71,7 @@ class World:
                     elif tile == 42: #create sergant
                         enemy = EnemySergant(x * TILE_SIZE, y * TILE_SIZE, 1.5, 3)
                         enemy_group.add(enemy)
-                    elif tile == 46:
+                    elif tile == 46: #create Mech/Boss
                         enemy = EnemyBoss(x * TILE_SIZE, y * TILE_SIZE, 1.5, 3)
                         enemy_group.add(enemy)
                     elif tile == 43: #exit level

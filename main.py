@@ -96,7 +96,7 @@ def main():
                     start_game = False
                     moving_right = False
                     collected_money += player.money
-                    text_points.update(collected_money, BLACK)
+                    text_points.update(player.money, BLACK)
                     reset_level()
 
         # print(f'id(player: {id(player)}')

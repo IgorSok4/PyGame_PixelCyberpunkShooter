@@ -133,6 +133,7 @@ class MainCharacter(pygame.sprite.Sprite):
         # update rectangle position
         self.rect.x += dx
         self.rect.y += dy
+        
 
         #scroll
         if self.char_type == 'player':
@@ -195,6 +196,7 @@ class MainCharacter(pygame.sprite.Sprite):
         if self.health <= 0:
             self.health = 0
             self.speed = 0
+            self.move(False, False)
             self.alive = False
             self.update_action(3)
         
